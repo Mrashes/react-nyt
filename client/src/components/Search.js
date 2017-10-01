@@ -4,7 +4,7 @@ class Search extends Component {
   render() {
     return (
         <div className="row">
-            <p>Search Parameters</p>
+            {/* <p>Search Parameters</p> */}
             <form>
                 <div>
                     <label>Search Term:</label>
@@ -14,7 +14,7 @@ class Search extends Component {
                         onChange={this.props.change}  
                         value={this.props.query} 
                         id="search"
-                        required
+                        placeholder="required"
                     />
                 </div>
                 <div>
@@ -25,7 +25,7 @@ class Search extends Component {
                         onChange={this.props.change} 
                         value={this.props.start} 
                         id="start"
-                        required 
+                        placeholder="required" 
                     />
                 </div>
                 <div>
@@ -36,7 +36,7 @@ class Search extends Component {
                         onChange={this.props.change}  
                         value={this.props.end} 
                         id="end"
-                        
+                        placeholder="required"
                     />
                 </div>
                 <div>

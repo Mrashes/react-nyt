@@ -21,40 +21,12 @@ class App extends Component {
     saved: []
   }
 
-  searchNYT = (query, start, end) => {
-      const apiKey = '8732a00e62b74f3293fa5ce646a98207';
-      axios.get(`http://api.nytimes.com/svc/search/v2/articlesearch.json?q=${query}&begin_date=${start}0101&end_date=${end}0101&api-key=${apiKey}`)
-      .then(res => {
-        // console.log(res.data.response.docs)
-        this.setState({ result: res.data.response.docs})
-      })
-      .catch(err => console.log(err));
-  };
+
+  //Lifecylce
+  componentDidMount() {
+    this.populateSaved()
+  }
   
-  saveArticle = event => {
-    const savedArticle = this.state.result.filter(result => result._id===event.target.id);
-    let Mongo = {
-      paper_id: savedArticle[0]._id,
-      web_url: savedArticle[0].web_url,
-      pub_date: savedArticle[0].pub_date,
-      headline: savedArticle[0].headline.main,
-    };
-    API.saveArticle(Mongo);
-    // this.setState({ saved: this.state.saved.concat(savedArticle) })
-  }
-
-  removeArticle = event => {
-    let savedState = this.state.saved
-    const removedArticle = savedState.filter(saved => saved._id===event.target.id);
-    savedState.splice(savedState.indexOf(removedArticle[0]), 1)
-    // savedState.splice(savedState.indexOf(removedArticle[0]), 1)
-    this.setState({ saved: savedState })
-  }
-
-  // componentDidMount = () => {
-
-  // }
-
   handleInputChange = event => {
     const name = event.target.name;
     const value = event.target.value;
@@ -69,6 +41,47 @@ class App extends Component {
     this.searchNYT(this.state.query, this.state.start, this.state.end);
     this.setState({ query: "", start:"", end:""})
   };
+
+
+  //Methods
+  populateSaved = () => {
+    API.getArticles().then(res => {
+        this.setState({ saved: res.data})
+      })
+      .catch(err => console.log(err));
+  }
+
+  searchNYT = (query, start, end) => {
+      const apiKey = '8732a00e62b74f3293fa5ce646a98207';
+      axios.get(`http://api.nytimes.com/svc/search/v2/articlesearch.json?q=${query}&begin_date=${start}0101&end_date=${end}0101&api-key=${apiKey}`)
+      .then(res => {
+        this.setState({ result: res.data.response.docs})
+      })
+      .catch(err => console.log(err));
+  }
+  
+  saveArticle = event => {
+    const savedArticle = this.state.result.filter(result => result._id===event.target.id);
+    let Mongo = {
+      paper_id: savedArticle[0]._id,
+      web_url: savedArticle[0].web_url,
+      pub_date: savedArticle[0].pub_date,
+      headline: savedArticle[0].headline.main,
+    };
+    API.saveArticle(Mongo).then(res => {
+      this.populateSaved()
+    }).catch(err => console.log(err))
+    // this.setState({ saved: this.state.saved.concat(savedArticle) })
+  }
+
+  removeArticle = event => {
+    API.deleteArticle(event.target.id)
+      .then(res => {
+        this.populateSaved()
+      }).catch(err => console.log(err))
+    
+  }
+
 
 
   render() {
@@ -87,7 +100,7 @@ class App extends Component {
           save={this.saveArticle}
         />
         <Saved 
-          savedArticleList={this.state.saved}
+          saved={this.state.saved}
           remove={this.removeArticle}
         />
       </div>
